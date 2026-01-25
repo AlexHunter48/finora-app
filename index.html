@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Figtree:ital,wght@0,300..900;1,300..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Science+Gothic:wght@100..900&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/lucide.min.js"></script>
+
+    <title>D</title>
+    
+</head>
+   <body>
+    <input type="checkbox" id="dark" hidden>
+    <div class="app">
+
+
+    <!--Sidebar-->
+
+     <input type="checkbox" id="pin" hidden>
+
+      <aside class="sidebar">
+
+        
+      <img class="brandlogo" src="./Images/Brandlogo.png" height="50px">
+        <div class="brand-name">
+
+         
+        <a class="home-link" href="/">Fi<span>Nora</span></a> 
+        
+        <label for="pin" class="toggle tgp">
+          <i class="fa-solid fa-thumbtack"></i>
+        </label>
+        </div>
+        
+        
+
+      
+        <nav>
+          <ul>
+         <li class="sidebar-links"><a class="link Dashboard active" href="dashboard.html"> <i class="fa-solid fa-chart-line"></i>
+         <span>Dashboard</span></a></li> 
+         <li class="sidebar-links"><a class="link Portfolio " href="portfolio.html"> <i class="fa-solid fa-briefcase"></i>
+           <span>Portfolio</span></a> </li>
+         <li class="sidebar-links"><a class="link Transactions " href="transactions.html"> <i class="fa-solid fa-receipt"></i>
+          <span>Transactions</span></a></li>
+         <li class="sidebar-links"><a class="link Help " href="help.html"> <i class="fa-solid fa-circle-question"></i>
+          <span>Help</span> </a></li>
+         <li class="sidebar-links"><a class="link settings " href="settings.html"> <i class="fa-solid fa-gear"></i>
+           <span>Settings</span></a></li>
+         </ul>
+
+
+         </nav>
+        
+
+     </aside>
+   
+   
+   
+      
+   
+
+
+      
+      <main>
+     
+      <nav class="topbar">
+
+      <div class="nav-left">
+      <div class="arrow-svg">
+         <svg class="arrow"  xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-right-icon lucide-move-right"><path d="M18 8L22 12L18 16"/><path d="M2 12H22"/></svg>
+        <p class="dashboard">Dashboard</p>
+      </div>
+       </div>
+
+      <div class="nav-right">
+        
+         <div class="lucide-icons">
+         <label for="dark" class="toggle" ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon lucide-moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></label>
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-dot-icon lucide-bell-dot"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M13.916 2.314A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.74 7.327A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673 9 9 0 0 1-.585-.665"/><circle cx="18" cy="8" r="3"/></svg>
+         <svg class="circle" xmlns="http://www.w3.org/2000/svg" width="40" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round-icon lucide-circle-user-round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+         <p class="name">Alex <span>Hunter</span></p>
+        </div>
+      </div>
+      </nav>
+
+
+      <!---Hero-->
+       <section id="hero">
+
+            <div class="welcome">
+         <h2>Welcome, <span>Alex</span></h2>
+             </div>
+
+  <div class="investment">
+
+    <div class="total amount cards">
+      <div class="ta">
+        <p class="figure">$125,000</p>
+        <p class="ti">Total Investment</p>
+      </div>
+      <div class="mara-logo">
+        <i class="fa-solid fa-sack-dollar dollar"></i>
+      </div>
+    </div>
+    
+    <div class="weekly amount cards">
+      <div class="ta">
+        <p class="figure">$15,450</p>
+        <p class="ti">Weekly Profit Earned</p>
+      </div>
+      <div class="mara-logo">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+    </div>
+    
+    <div class="cummulative amount cards">
+      <div class="ta">
+        <p class="figure">$74,970</p>
+        <p class="ti">Cumulative Profit<span class="till"> (till date)</span></p>
+      </div>
+      <div class="mara-logo">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+    </div>
+    
+   
+
+
+   
+
+    <div class="chart cards">
+      <img class="chartlogo" src="./Images/chart.png">
+    </div>
+
+
+    <div class="live-chart">
+      
+
+         <div class="brokerage-feed cards">
+      <h4 class="feed">Live Brokerage Feed</h4>
+      <div class="traderman">
+        <img src="https://ui-avatars.com/api/?name=TM&background=FF9800&color=fff&size=40&rounded=true" alt="TM">
+        <div>
+          <h4>Traderman</h4>
+          <p class="TM">TM</p>
+        </div>
+        <div class="tradervalue">
+          <p class="usd">$500,000 USD</p>
+          <span class="usdspan">+$19 (1.2%)</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Card 2: Trader Notes -->
+    <div class="trader-notes cards">
+      <h5 class="headline">Quick Trader Notes</h5>
+      <h3 class="focusing">Focusing on XAUUSD this week.</h3>
+        <p>Current Strategy:averaging approx. 2% profit per position based on volatility pattern.</p>
+      
+      
+    </div>
+    
+    <!-- Card 3: Trades Active -->
+     <div class="trades-card cards">
+    <div class="trades-header">
+         <h4>Trades Active</h4>
+    <span class="trades-status">● Live</span>
+  </div>
+
+   <div class="trades-value">102</div>
+
+   <div class="trades-trend">
+    <span class="trend-up">▲ +6 today</span>
+   </div>
+
+   <div class="trades-breakdown">
+    <span>Open: 78</span>
+    <span>Pending: 14</span>
+    <span>Closed: 10</span>
+    </div>
+    </div>
+    </div> <!-- Close live-chart -->
+  
+    </div> <!-- Close bottom -->
+  
+    </div>
+   </div>
+
+   </div> 
+
+
+
+
+
+
+
+      </main>
+      </div>
+</body>
+</html>
