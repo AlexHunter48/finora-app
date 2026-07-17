@@ -1,7 +1,7 @@
-import { useState } from "react";
+import MainLayout from "./layouts/MainLayout";
 
-function Finora() {
-  return <div>Finora</div>;
+function App() {
+  return <MainLayout />;
 }
 
-export default Finora;
+export default App;
