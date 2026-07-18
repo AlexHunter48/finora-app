@@ -3,3 +3,13 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", sans-serif;
 }
+
+@layer base {
+  * {
+    @apply transition-colors;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
