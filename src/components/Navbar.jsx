@@ -51,7 +51,7 @@ function Navbar() {
           <div className="mt-8">
             <Button
               className={
-                "py- rounded-md px-6 font-semibold md:px-12 md:py-4 md:text-2xl"
+                "rounded-md px-6 font-semibold md:px-12 md:py-4 md:text-2xl"
               }
             >
               {" "}

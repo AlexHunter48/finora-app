@@ -56,12 +56,11 @@ export default function HowItWorks() {
       <div className="mt-3 flex flex-col items-center justify-center">
         <Button
           className={
-            "mb-9 w-fit px-3 py-2 text-xl font-semibold capitalize lg:font-bold lg:text-zinc-950"
+            "mb-9 hidden w-fit px-3 py-2 text-xl font-semibold capitalize lg:font-bold lg:text-zinc-950"
           }
         >
           Start Tracking
         </Button>
-        <p className="text-sm text-gray-300">No credit card required</p>
       </div>
     </section>
   );
