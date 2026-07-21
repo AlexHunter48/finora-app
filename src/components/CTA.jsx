@@ -9,7 +9,7 @@ export default function CTA() {
         <br />
         or lose track of their spending again.
       </p>
-      <button className="rounded-full bg-[#0F0E0D] px-8 py-4 font-bold text-gray-300 lg:py-5">
+      <button className="rounded-full bg-[#0F0E0D] px-8 py-4 font-bold text-gray-300 transition-colors duration-300 hover:bg-[#0F0E0D]/60 lg:py-5">
         Get started for free
       </button>
       <p className="lg:text-md mt-4 text-sm">No credit card required</p>

@@ -1,9 +1,12 @@
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <header
@@ -30,22 +33,34 @@ function Navbar() {
             <a href="/">Pricing</a>
           </li>
           <li className="whitespace-nowrap">
-            <a href="#login">Login</a>
+            <NavLink to="/Login">Login</NavLink>
           </li>
 
           <li className="whitespace-nowrap">
-            <Button>Get started </Button>
+            <Button className={"lg:py-2"}>Get started </Button>
           </li>
         </ul>
       </nav>
       {isOpen && (
-        <div className="flex flex-col gap-6 px-8 py-12 md:items-center md:text-center lg:hidden">
+        <div
+          className="flex flex-col gap-6 px-8 py-12 md:items-center md:text-center lg:hidden"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           <nav className="mt-5 flex flex-col gap-6 px-4">
             <ul className="md:text-md flex flex-col gap-6 space-y-9 text-lg font-medium text-gray-300 md:gap-10 md:text-2xl">
-              <li>Features</li>
-              <li>How it works</li>
-              <li>Pricing</li>
-              <li>Login</li>
+              <li>
+                <a href="#features">Features</a>
+              </li>
+              <li>
+                <a href="#how-it-works">How it works</a>
+              </li>
+              <li>
+                <a href="">Pricing</a>
+              </li>
+              <li>
+                {" "}
+                <NavLink to="/Login">Login </NavLink>
+              </li>
             </ul>
           </nav>
           <div className="mt-8">
@@ -53,6 +68,7 @@ function Navbar() {
               className={
                 "rounded-md px-6 font-semibold md:px-12 md:py-4 md:text-2xl"
               }
+              onClick={() => navigate("/Sign-up")}
             >
               {" "}
               Get started
