@@ -1,10 +1,12 @@
-import { NavLink } from "react-router-dom";
 import { useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Lock } from "lucide-react";
-import heroBg from "../assets/login.png";
-export default function Login() {
+import { useGoogleLogin } from "@react-oauth/google";
+import { NavLink } from "react-router-dom";
+import authImage from "../assets/login.png";
+
+export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const login = useGoogleLogin({
     onSuccess: (response) => console.log(response),
@@ -24,12 +26,26 @@ export default function Login() {
 
             <form className="flex flex-col">
               <h2 className="text-[48px] leading-none font-semibold tracking-[-0.04em] text-[#F8F7F5]">
-                Welcome back
+                Create your account
               </h2>
 
               <p className="mt-5 mb-12 max-w-xs text-[17px] leading-8 text-[#A7A39C]">
-                Sign in to continue to your account.
+                Join Finora today and take control of your finances.
               </p>
+
+              <label
+                htmlFor="name"
+                className="mb-3 text-sm font-medium tracking-wide text-[#E6E2DD]"
+              >
+                Full name
+              </label>
+              <input
+                type="text"
+                required
+                id="name"
+                placeholder="Enter your full name"
+                className="mb-8 w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
+              />
 
               <label
                 htmlFor="email"
@@ -37,10 +53,9 @@ export default function Login() {
               >
                 Email address
               </label>
-
               <input
                 type="email"
-                required="true"
+                required
                 id="email"
                 placeholder="Enter your email"
                 className="mb-8 w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
@@ -52,16 +67,14 @@ export default function Login() {
               >
                 Password
               </label>
-
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  required="true"
+                  required
                   id="password"
-                  placeholder="Enter your password"
+                  placeholder="Create a password"
                   className="w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -71,17 +84,35 @@ export default function Login() {
                 </button>
               </div>
 
-              <div className="mt-4 mb-8 flex justify-end">
-                <NavLink
-                  to="#"
-                  className="text-sm font-medium text-[#D07B3F] transition-colors hover:text-[#E59A5B]"
+              <label
+                htmlFor="confirmPassword"
+                className="mt-8 mb-3 text-sm font-medium tracking-wide text-[#E6E2DD]"
+              >
+                Confirm password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  id="confirmPassword"
+                  placeholder="Confirm your password"
+                  className="w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute top-1/2 right-5 -translate-y-1/2 text-[#8C8780] transition hover:text-white"
                 >
-                  Forgot password?
-                </NavLink>
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
               </div>
 
-              <button className="h-14 rounded-2xl bg-gradient-to-r from-[#C96F35] to-[#E08C49] font-semibold tracking-wide text-[#111111] shadow-lg shadow-[#C96F35]/20 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-[#C96F35]/35 active:scale-[0.99]">
-                Sign in
+              <button className="mt-8 h-14 rounded-2xl bg-gradient-to-r from-[#C96F35] to-[#E08C49] font-semibold tracking-wide text-[#111111] shadow-lg shadow-[#C96F35]/20 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-[#C96F35]/35 active:scale-[0.99]">
+                Create account
               </button>
 
               <div className="my-8 flex items-center gap-4">
@@ -116,12 +147,12 @@ export default function Login() {
               </button>
 
               <div className="mt-10 text-center text-sm text-[#99948D]">
-                New to Finora?{" "}
+                Already have an account?{" "}
                 <NavLink
-                  to="/Sign-up"
+                  to="/login"
                   className="font-medium text-[#D07B3F] transition hover:text-[#E59A5B]"
                 >
-                  Create an account
+                  Sign in
                 </NavLink>
               </div>
 
@@ -135,11 +166,10 @@ export default function Login() {
 
         <div className="relative hidden lg:block">
           <img
-            src={heroBg}
+            src={authImage}
             alt="Finora"
             className="h-full w-full object-cover brightness-90 contrast-110"
           />
-
           <div className="absolute inset-0 bg-gradient-to-r from-[#0F0E0D] via-transparent to-transparent"></div>
         </div>
       </div>
