@@ -6,10 +6,13 @@ import { DashboardProvider } from "../context/DashboardContext";
 export default function DashboardLayout() {
   return (
     <DashboardProvider>
-      <div className="flex min-h-screen">
-        <Sidebar />
+      <div className="flex h-screen w-full overflow-hidden bg-[#0F0E0D] text-[#F5F5F5]">
+        <aside className="hidden h-full w-64 shrink-0 flex-col bg-[#141311] lg:flex">
+          {" "}
+          <Sidebar />
+        </aside>
 
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+        <main className="h-full flex-1 overflow-y-auto pb-20 lg:pb-0">
           <Outlet />
         </main>
 

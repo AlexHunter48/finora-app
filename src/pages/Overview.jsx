@@ -30,7 +30,7 @@ export default function Overview() {
   }, []);
 
   return (
-    <section className="min-h-dvh bg-[#0F0E0D] px-5 pt-6 pb-28 lg:px-10 lg:py-10">
+    <section className="min-h-dvh overflow-y-auto bg-[#0F0E0D] px-5 pt-6 pb-28 lg:px-10 lg:py-10">
       <header className="mb-8 flex items-center justify-between lg:hidden">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
