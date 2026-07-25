@@ -9,7 +9,7 @@ import UpcomingRenewals from "../components/UpcomingRenewals";
 import RecentTransactions from "../components/RecentTransactions";
 import InsightCard from "../components/InsightCard";
 
-export default function Overview() {
+   export default function Overview() {
   const { isOpen, setIsOpen } = useDash();
   const [greeting, setGreeting] = useState("");
   const name = "Alex";
@@ -19,11 +19,11 @@ export default function Overview() {
     const hour = new Date().getHours();
 
     if (hour >= 5 && hour < 12) {
-      setGreeting("Good morning " + name + emoji);
+      setGreeting("Good morning " + " " + name + emoji);
     } else if (hour >= 12 && hour < 17) {
-      setGreeting("Good afternoon" + name + emoji);
+      setGreeting("Good afternoon" + " " + name + emoji);
     } else if (hour >= 17 && hour < 22) {
-      setGreeting("Good evening" + name + emoji);
+      setGreeting("Good evening" + " " + name + emoji);
     } else {
       setGreeting("Hello, night owl");
     }

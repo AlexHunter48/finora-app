@@ -4,11 +4,14 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import "./index.css";
 import App from "./App.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
     <StrictMode>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </StrictMode>
   </GoogleOAuthProvider>,
 );

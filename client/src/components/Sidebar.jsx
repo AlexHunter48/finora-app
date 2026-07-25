@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useDash } from "../context/DashboardContext";
-
+import { useAuth } from "../context/AuthContext";
 export default function Sidebar() {
   const { isOpen, setIsOpen } = useDash();
 
@@ -20,6 +20,8 @@ export default function Sidebar() {
     e?.stopPropagation();
     setIsOpen(false);
   };
+
+  const { user } = useAuth();
 
   const links = [
     {
@@ -58,6 +60,7 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           onClick={handleClose}
@@ -65,8 +68,9 @@ export default function Sidebar() {
         />
       )}
 
+      {/* Sidebar Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex min-h-dvh w-64 flex-col justify-between border-r border-white/[0.08] bg-[#141311] px-4 py-6 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 flex h-dvh w-64 flex-col justify-between border-r border-white/[0.08] bg-[#141311] px-4 py-6 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -144,10 +148,10 @@ export default function Sidebar() {
 
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-[#F5F5F5]">
-                  Alex Hunter
+                  {user?.name}
                 </p>
                 <p className="truncate text-[11px] text-[#8F8A84]">
-                  alex@example.com
+                  {user?.email}
                 </p>
               </div>
             </div>

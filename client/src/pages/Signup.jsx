@@ -1,12 +1,50 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import authImage from "../assets/login.png";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  async function handleSignUp(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      if (password !== confirmPassword) {
+        throw new Error("Passwords must match");
+      }
+      const response = await fetch("http://localhost:3000/api/auth/sign-up", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Sign-up failed");
+      }
+      navigate("/Login");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   const login = useGoogleLogin({
     onSuccess: (response) => console.log(response),
@@ -24,7 +62,7 @@ export default function Signup() {
               </h1>
             </div>
 
-            <form className="flex flex-col">
+            <form className="flex flex-col" onSubmit={handleSignUp}>
               <h2 className="text-[48px] leading-none font-semibold tracking-[-0.04em] text-[#F8F7F5]">
                 Create your account
               </h2>
@@ -41,9 +79,11 @@ export default function Signup() {
               </label>
               <input
                 type="text"
-                required
+                required:true
                 id="name"
                 placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="mb-8 w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
               />
 
@@ -57,6 +97,8 @@ export default function Signup() {
                 type="email"
                 required
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="mb-8 w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
               />
@@ -71,6 +113,8 @@ export default function Signup() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   id="password"
                   placeholder="Create a password"
                   className="w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
@@ -94,6 +138,8 @@ export default function Signup() {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   id="confirmPassword"
                   placeholder="Confirm your password"
                   className="w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"

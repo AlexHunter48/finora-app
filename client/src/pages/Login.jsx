@@ -1,15 +1,48 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import heroBg from "../assets/login.png";
+import { useAuth } from "../context/AuthContext";
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const { Login } = useAuth();
 
   const login = useGoogleLogin({
     onSuccess: (response) => console.log(response),
     onError: () => console.log("Login failed"),
   });
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Log-in failed");
+      }
+      Login(data.user, data.token);
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   return (
     <section className="min-h-screen bg-[#0F0E0D]">
@@ -22,7 +55,7 @@ export default function Login() {
               </h1>
             </div>
 
-            <form className="flex flex-col">
+            <form className="flex flex-col" onSubmit={handleLogin}>
               <h2 className="text-[48px] leading-none font-semibold tracking-[-0.04em] text-[#F8F7F5]">
                 Welcome back
               </h2>
@@ -41,6 +74,8 @@ export default function Login() {
               <input
                 type="email"
                 required="true"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 id="email"
                 placeholder="Enter your email"
                 className="mb-8 w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
@@ -57,6 +92,8 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required="true"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   id="password"
                   placeholder="Enter your password"
                   className="w-full rounded-2xl border border-white/[0.07] bg-[#11100F] px-5 py-4 text-white transition-all duration-300 placeholder:text-[#6D6A66] focus:border-[#D07B3F] focus:ring-4 focus:ring-[#D07B3F]/10 focus:outline-none"
