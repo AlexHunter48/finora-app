@@ -3,6 +3,22 @@ import { useTransactions } from "../context/TransactionsContext";
 
 export default function HeroCard() {
   const { monthlySpend, currentMonth, currentYear } = useTransactions();
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const currentMonthName = monthNames[currentMonth];
   return (
     <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#141311] p-5 text-[#F5F5F5] shadow-[0_30px_70px_rgba(0,0,0,0.45)] sm:p-6">
       <div className="pointer-events-none absolute top-0 -right-10 h-60 w-60 rounded-full bg-[#C9733D]/10 blur-[90px]" />
@@ -12,7 +28,7 @@ export default function HeroCard() {
           <div className="flex items-center justify-between">
             <p className="text-xs text-[#A8A39B]">Total spent this month</p>
             <button className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#1D1C1A] px-3 py-1.5 text-xs text-[#F5F5F5] transition hover:border-[#C9733D]">
-              {currentMonth} {currentYear}
+              {currentMonthName} {currentYear}
               <ChevronDown size={12} className="text-[#A8A39B]" />
             </button>
           </div>

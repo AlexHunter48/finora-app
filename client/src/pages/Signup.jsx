@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { NavLink, useNavigate } from "react-router-dom";
 import authImage from "../assets/login.png";
+import { API_BASE_URL } from "../config/api";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -17,7 +18,7 @@ export default function Signup() {
 
   const navigate = useNavigate();
   const { Login } = useAuth();
-  
+
   async function handleSignUp(e) {
     e.preventDefault();
     setError("");
@@ -26,7 +27,7 @@ export default function Signup() {
       if (password !== confirmPassword) {
         throw new Error("Passwords must match");
       }
-      const response = await fetch("http://localhost:3000/api/auth/sign-up", {
+      const response = await fetch(`${API_BASE_URL}/auth/sign-up`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,7 +55,7 @@ export default function Signup() {
     onSuccess: async (tokenResponse) => {
       setError("");
       try {
-        const res = await fetch("http://localhost:3000/api/auth/google", {
+        const res = await fetch(`${API_BASE_URL}/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: tokenResponse.access_token }),

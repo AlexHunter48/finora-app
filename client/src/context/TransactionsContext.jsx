@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { API_BASE_URL } from "../config/api";
 import { useAuth } from "./AuthContext";
 
 const TransactionContext = createContext();
@@ -15,7 +16,7 @@ export function TransactionProvider({ children }) {
       setLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:3000/api/bank/transactions?monoAccountId=${accountId}`,
+          `${API_BASE_URL}/bank/transactions?monoAccountId=${accountId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },

@@ -4,6 +4,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import heroBg from "../assets/login.png";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config/api";
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ export default function Login() {
     onSuccess: async (tokenResponse) => {
       setError("");
       try {
-        const res = await fetch("http://localhost:3000/api/auth/google", {
+        const res = await fetch(`${API_BASE_URL}/auth/google`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: tokenResponse.access_token }),
@@ -48,7 +49,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

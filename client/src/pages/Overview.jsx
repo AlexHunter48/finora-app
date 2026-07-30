@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Bell, Landmark, Menu, X } from "lucide-react";
-// @ts-ignore
+
 import MonoConnect from "@mono.co/connect.js";
 import { useDash } from "../context/DashboardContext";
 import HeroCard from "../components/HeroCard";
@@ -11,6 +11,7 @@ import UpcomingRenewals from "../components/UpcomingRenewals";
 import RecentTransactions from "../components/RecentTransactions";
 import InsightCard from "../components/InsightCard";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config/api";
 
 export default function Overview() {
   const { isOpen, setIsOpen } = useDash();
@@ -43,17 +44,14 @@ export default function Overview() {
       key: import.meta.env.VITE_MONO_PUBLIC_KEY,
       onSuccess: async (data) => {
         try {
-          const response = await fetch(
-            "http://localhost:3000/api/bank/connect",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ code: data.code }),
+          const response = await fetch(`${API_BASE_URL}/bank/connect`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
-          );
+            body: JSON.stringify({ code: data.code }),
+          });
 
           const result = await response.json();
           console.log(result);

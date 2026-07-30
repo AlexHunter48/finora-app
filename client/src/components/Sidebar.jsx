@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   CreditCard,
@@ -10,18 +11,38 @@ import {
   Settings,
   ChevronDown,
   X,
+  LogOut,
 } from "lucide-react";
 import { useDash } from "../context/DashboardContext";
 import { useAuth } from "../context/AuthContext";
+
 export default function Sidebar() {
   const { isOpen, setIsOpen } = useDash();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const handleClose = (e) => {
     e?.stopPropagation();
     setIsOpen(false);
   };
 
-  const { user } = useAuth();
+  const handleLogout = async () => {
+    try {
+      if (logout) {
+        await logout();
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      handleClose();
+      navigate("/login");
+    }
+  };
 
   const links = [
     {
@@ -58,9 +79,17 @@ export default function Sidebar() {
     },
   ];
 
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "AH";
+
   return (
     <>
-      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           onClick={handleClose}
@@ -68,7 +97,6 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Sidebar Drawer */}
       <aside
         className={`fixed top-0 bottom-0 left-0 z-50 flex h-dvh w-64 flex-col justify-between border-r border-white/[0.08] bg-[#141311] px-4 py-6 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -134,31 +162,49 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className="pt-4">
+        <div className="relative pt-4">
           <div className="mb-4 border-t border-white/[0.06]" />
 
-          <div className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/[0.04] bg-[#1A1917]/80 p-2.5 transition-all duration-200 hover:border-white/[0.1] hover:bg-[#1A1917]">
+          {showProfileMenu && (
+            <div className="animate-in fade-in slide-in-from-bottom-2 absolute bottom-full left-0 mb-2 w-full rounded-xl border border-white/[0.1] bg-[#181715] p-1.5 shadow-2xl backdrop-blur-md duration-150">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-rose-400 transition hover:bg-rose-500/10"
+              >
+                <LogOut size={15} />
+                <span>Log Out</span>
+              </button>
+            </div>
+          )}
+
+          <div
+            onClick={() => setShowProfileMenu((prev) => !prev)}
+            className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/[0.04] bg-[#1A1917]/80 p-2.5 transition-all duration-200 hover:border-white/[0.1] hover:bg-[#1A1917]"
+          >
             <div className="flex min-w-0 items-center gap-3">
               <div className="relative shrink-0">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[#C9733D] to-[#E28B51] text-xs font-bold text-white shadow-sm ring-2 ring-white/10">
-                  AH
+                  {initials}
                 </div>
                 <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full bg-[#45C27A] ring-2 ring-[#141311]" />
               </div>
 
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-[#F5F5F5]">
-                  {user?.name}
+                  {user?.name || "User Account"}
                 </p>
                 <p className="truncate text-[11px] text-[#8F8A84]">
-                  {user?.email}
+                  {user?.email || "user@email.com"}
                 </p>
               </div>
             </div>
 
             <ChevronDown
               size={16}
-              className="shrink-0 text-[#8F8A84] transition-transform duration-200 group-hover:text-[#F5F5F5]"
+              className={`shrink-0 text-[#8F8A84] transition-transform duration-200 group-hover:text-[#F5F5F5] ${
+                showProfileMenu ? "rotate-180" : ""
+              }`}
             />
           </div>
         </div>
