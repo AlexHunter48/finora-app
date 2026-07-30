@@ -16,7 +16,6 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-[#0F0E0D] px-4 py-6 pb-28 text-[#F5F5F5] sm:px-8 lg:px-10 lg:pb-10">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -36,7 +35,6 @@ export default function Settings() {
       </div>
 
       <div className="mt-8 flex max-w-3xl flex-col gap-6">
-        {/* Profile Card */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-6 shadow-lg">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C9733D] text-lg font-bold text-white">
@@ -51,7 +49,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Currency Preference */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-6 shadow-lg">
           <div className="flex items-center gap-3 text-sm font-semibold text-[#F5F5F5]">
             <Globe size={18} className="text-[#C9733D]" />
@@ -79,7 +76,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Linked Accounts */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-sm font-semibold text-[#F5F5F5]">

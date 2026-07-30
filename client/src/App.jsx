@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Homepage from "./pages/Homepage";
+
 import DashboardLayout from "./layouts/DashboardLayout";
 import Overview from "./pages/Overview";
 import Subscriptions from "./pages/Subscriptions";
@@ -13,6 +13,7 @@ import Budgets from "./pages/Budgets";
 import Goals from "./pages/Goals";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -21,7 +22,15 @@ function App() {
         <Route index element={<MainLayout />} />
         <Route path="Login" element={<Login />} />
         <Route path="Sign-up" element={<Signup />} />
-        <Route path="/dashboard" element={<DashboardLayout />}>
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Overview />} />
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="spending" element={<Spending />} />

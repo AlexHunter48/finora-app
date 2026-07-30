@@ -15,14 +15,38 @@ export default function Login() {
   const { Login } = useAuth();
 
   const login = useGoogleLogin({
-    onSuccess: (response) => console.log(response),
-    onError: () => console.log("Login failed"),
+    onSuccess: async (tokenResponse) => {
+      setError("");
+      try {
+        const res = await fetch("http://localhost:3000/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: tokenResponse.access_token }),
+        });
+
+        const data = await res.json();
+
+        console.log(data);
+
+        if (!res.ok) {
+          setError(data.message || "Log-in failed");
+          throw new Error(data.message || "Log-in failed");
+        }
+        console.log("Status:", res.status);
+        console.log("Response data:", data);
+
+        Login(data.user, data.token);
+        navigate("/dashboard");
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    onError: () => console.log("Google login failed"),
   });
 
   async function handleLogin(e) {
     e.preventDefault();
     setError("");
-
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
@@ -32,12 +56,18 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/Login";
+        return;
+      }
+
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || "Log-in failed");
       }
-      Login(data.user, data.token);
 
+      Login(data.user, data.token);
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
@@ -63,6 +93,12 @@ export default function Login() {
               <p className="mt-5 mb-12 max-w-xs text-[17px] leading-8 text-[#A7A39C]">
                 Sign in to continue to your account.
               </p>
+
+              {error && (
+                <div className="mb-4 rounded-lg border border-red-800 bg-red-950/40 p-3 text-sm text-red-400">
+                  {error}
+                </div>
+              )}
 
               <label
                 htmlFor="email"

@@ -16,8 +16,8 @@ import {
   CheckCircle2,
   Globe,
 } from "lucide-react";
+import { useTransactions } from "../context/TransactionsContext";
 
-// Category config with dynamic colors & Lucide icons
 const categoryConfig = {
   entertainment: {
     label: "Entertainment",
@@ -51,87 +51,259 @@ const categoryConfig = {
   },
 };
 
-const initialSubscriptions = [
-  {
-    id: "1",
-    name: "Netflix",
-    plan: "Premium 4K",
-    category: "entertainment",
-    amount: "₦6,500",
-    cycle: "monthly",
-    renewalDate: "Jul 26",
-    daysLeft: 3,
-    status: "active",
-    isFX: false,
-  },
-  {
-    id: "2",
-    name: "Spotify",
-    plan: "Individual",
-    category: "music",
-    amount: "₦2,300",
-    cycle: "monthly",
-    renewalDate: "Jul 29",
-    daysLeft: 6,
-    status: "active",
-    isFX: false,
-  },
-  {
-    id: "3",
-    name: "ChatGPT Plus",
-    plan: "Pro Tier ($20)",
-    category: "productivity",
-    amount: "₦32,000",
-    cycle: "monthly",
-    renewalDate: "Aug 02",
-    daysLeft: 10,
-    status: "active",
-    isFX: true, // Fluctuation tag
-  },
-  {
-    id: "4",
-    name: "iCloud+",
-    plan: "200GB Storage",
-    category: "cloud",
-    amount: "₦1,200",
-    cycle: "monthly",
-    renewalDate: "Aug 14",
-    daysLeft: 22,
-    status: "active",
-    isFX: false,
-  },
-  {
-    id: "5",
-    name: "Adobe CC",
-    plan: "All Apps",
-    category: "productivity",
-    amount: "₦45,000",
-    cycle: "monthly",
-    renewalDate: "Jul 28",
-    daysLeft: 5,
-    status: "active",
-    isFX: false,
-  },
-  {
-    id: "6",
-    name: "GitHub Copilot",
-    plan: "Individual ($10)",
-    category: "developer",
-    amount: "₦16,000",
-    cycle: "monthly",
-    renewalDate: "Aug 20",
-    daysLeft: 28,
-    status: "active",
-    isFX: true,
-  },
+const fxMerchants = [
+  "chatgpt",
+  "openai",
+  "github",
+  "copilot",
+  "adobe",
+  "figma",
+  "aws",
+  "vercel",
+  "netlify",
+  "midjourney",
+  "cursor",
 ];
+
+const formatMerchantName = (rawText) => {
+  if (!rawText) return "Subscription";
+  const str = rawText.toLowerCase();
+
+  if (str.includes("netflix")) return "Netflix";
+  if (str.includes("spotify")) return "Spotify";
+  if (str.includes("chatgpt") || str.includes("openai")) return "ChatGPT Plus";
+  if (str.includes("icloud") || (str.includes("apple") && str.includes("bill")))
+    return "iCloud+";
+  if (str.includes("adobe")) return "Adobe CC";
+  if (str.includes("github") || str.includes("copilot"))
+    return "GitHub Copilot";
+  if (str.includes("youtube")) return "YouTube Premium";
+  if (str.includes("dstv")) return "DStv";
+  if (str.includes("showmax")) return "Showmax";
+  if (str.includes("prime") || str.includes("amazon")) return "Amazon Prime";
+
+  return (
+    rawText
+      .split("/")[0]
+      .replace(/POS|WEB|FLW|PAYSTACK/gi, "")
+      .trim() || rawText
+  );
+};
+
+const calculateRenewalStatus = (rawDate) => {
+  const now = new Date();
+  let target = rawDate ? new Date(rawDate) : new Date();
+
+  if (isNaN(target.getTime()) || target < now) {
+    const billingDay = target.getDate() || 15;
+    target = new Date(now.getFullYear(), now.getMonth(), billingDay);
+    if (target < now) {
+      target.setMonth(target.getMonth() + 1);
+    }
+  }
+
+  const diffTime = target.getTime() - now.getTime();
+  const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  const renewalDate = target.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+  });
+
+  return { daysLeft, renewalDate };
+};
+
+const normalizeMonoSubscription = (sub, idx) => {
+  const rawName =
+    sub.name ||
+    sub.title ||
+    sub.merchant ||
+    sub.narration ||
+    sub.description ||
+    "Subscription";
+
+  const cleanName = formatMerchantName(rawName);
+  const lowerText = `${rawName} ${cleanName}`.toLowerCase();
+
+  let category = sub.category ? String(sub.category).toLowerCase() : "";
+  if (!categoryConfig[category]) {
+    if (
+      lowerText.includes("netflix") ||
+      lowerText.includes("dstv") ||
+      lowerText.includes("prime") ||
+      lowerText.includes("youtube") ||
+      lowerText.includes("showmax")
+    ) {
+      category = "entertainment";
+    } else if (
+      lowerText.includes("spotify") ||
+      lowerText.includes("music") ||
+      lowerText.includes("apple music")
+    ) {
+      category = "music";
+    } else if (
+      lowerText.includes("cloud") ||
+      lowerText.includes("icloud") ||
+      lowerText.includes("drive") ||
+      lowerText.includes("dropbox")
+    ) {
+      category = "cloud";
+    } else if (
+      lowerText.includes("github") ||
+      lowerText.includes("copilot") ||
+      lowerText.includes("vercel") ||
+      lowerText.includes("aws")
+    ) {
+      category = "developer";
+    } else {
+      category = "productivity";
+    }
+  }
+
+  let rawAmount = 0;
+  if (typeof sub.amount === "number") {
+    rawAmount = Math.abs(sub.amount);
+  } else if (typeof sub.amount === "string") {
+    const cleaned = sub.amount.replace(/,/g, "").replace(/[^0-9.]/g, "");
+    rawAmount = parseFloat(cleaned) || 0;
+  }
+
+  const isKoboUnit =
+    sub.isKobo ||
+    (typeof sub.amount === "number" &&
+      Number.isInteger(sub.amount) &&
+      sub.amount >= 100000) ||
+    (typeof sub.amount === "string" && !sub.amount.includes("."));
+
+  const numericAmount = isKoboUnit ? rawAmount / 100 : rawAmount;
+  const formattedAmount = `₦${numericAmount.toLocaleString("en-NG", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+
+  const isFX =
+    sub.isFX ||
+    sub.currency === "USD" ||
+    fxMerchants.some((m) => lowerText.includes(m));
+
+  const { daysLeft, renewalDate } = calculateRenewalStatus(
+    sub.nextPaymentDate || sub.renewalDate || sub.date || sub.createdAt,
+  );
+
+  return {
+    id: sub._id || sub.id || String(idx + 1),
+    name: cleanName,
+    plan:
+      sub.plan ||
+      sub.description ||
+      (isFX ? "Foreign Subscription" : "Standard Plan"),
+    category,
+    amount: formattedAmount,
+    rawAmount: numericAmount,
+    cycle: sub.cycle || "monthly",
+    renewalDate,
+    daysLeft,
+    status: sub.status || "active",
+    isFX,
+  };
+};
 
 export default function Subscriptions() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const filteredSubscriptions = initialSubscriptions.filter((sub) => {
+  const context = useTransactions() || {};
+  const {
+    subscriptions: monoSubscriptions = [],
+    transactions = [],
+    monthlyTransactions = [],
+  } = context;
+
+  const allContextTransactions = [
+    ...monoSubscriptions,
+    ...(monthlyTransactions.length > 0 ? monthlyTransactions : transactions),
+  ];
+
+  const autoDetectedSubscriptions = allContextTransactions.filter((tx) => {
+    if (!tx) return false;
+    if (tx.type === "subscription" || tx.isSubscription) return true;
+
+    const fullText = [
+      tx.title,
+      tx.merchant,
+      tx.category,
+      tx.narration,
+      tx.description,
+      tx.name,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const subKeywords = [
+      "subscrip",
+      "netflix",
+      "spotify",
+      "chatgpt",
+      "openai",
+      "icloud",
+      "apple.com/bill",
+      "apple",
+      "adobe",
+      "github",
+      "copilot",
+      "google",
+      "youtube",
+      "prime",
+      "amazon",
+      "dstv",
+      "gotv",
+      "showmax",
+      "canva",
+      "figma",
+      "cursor",
+      "midjourney",
+      "vercel",
+      "aws",
+      "heroku",
+      "linkedin",
+    ];
+
+    return subKeywords.some((keyword) => fullText.includes(keyword));
+  });
+
+  const normalizedSubscriptions = autoDetectedSubscriptions.map(
+    normalizeMonoSubscription,
+  );
+
+  const activeSubscriptions = normalizedSubscriptions.filter(
+    (sub) => sub.status === "active",
+  );
+
+  const monthlyTotalVal = activeSubscriptions.reduce(
+    (sum, sub) => sum + sub.rawAmount,
+    0,
+  );
+
+  const dueThisWeekSubs = activeSubscriptions.filter(
+    (sub) => sub.daysLeft <= 7,
+  );
+  const dueThisWeekVal = dueThisWeekSubs.reduce(
+    (sum, sub) => sum + sub.rawAmount,
+    0,
+  );
+
+  const highestExpenseSub = [...activeSubscriptions].sort(
+    (a, b) => b.rawAmount - a.rawAmount,
+  )[0] || { name: "None", rawAmount: 0 };
+
+  const yearlyForecastVal = monthlyTotalVal * 12;
+  const formattedYearlyForecast =
+    yearlyForecastVal >= 1000000
+      ? `₦${(yearlyForecastVal / 1000000).toFixed(2)}M`
+      : `₦${yearlyForecastVal.toLocaleString("en-NG")}`;
+
+  const filteredSubscriptions = normalizedSubscriptions.filter((sub) => {
     const matchesSearch =
       sub.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sub.plan.toLowerCase().includes(searchTerm.toLowerCase());
@@ -141,9 +313,12 @@ export default function Subscriptions() {
     return matchesSearch;
   });
 
+  const dueSoonCount = normalizedSubscriptions.filter(
+    (sub) => sub.daysLeft <= 7,
+  ).length;
+
   return (
     <div className="min-h-screen bg-[#0F0E0D] px-4 py-6 pb-28 text-[#F5F5F5] sm:px-8 lg:px-10 lg:pb-10">
-      {/* 1. Header with Back Button & Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <button
@@ -171,9 +346,7 @@ export default function Subscriptions() {
         </button>
       </div>
 
-      {/* 2. Key Realistic Metrics Grid */}
       <div className="mt-6 grid grid-cols-2 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Monthly Total */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-4 shadow-lg sm:p-5">
           <div className="flex items-center justify-between text-[#8F8A84]">
             <span className="text-xs font-medium">Monthly Total</span>
@@ -182,12 +355,13 @@ export default function Subscriptions() {
             </div>
           </div>
           <p className="mt-3 text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl">
-            ₦103,000
+            ₦{monthlyTotalVal.toLocaleString("en-NG")}
           </p>
-          <p className="mt-1 text-[11px] text-[#8F8A84]">6 active services</p>
+          <p className="mt-1 text-[11px] text-[#8F8A84]">
+            {activeSubscriptions.length} active services
+          </p>
         </div>
 
-        {/* Due This Week */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-4 shadow-lg sm:p-5">
           <div className="flex items-center justify-between text-[#8F8A84]">
             <span className="text-xs font-medium">Due This Week</span>
@@ -196,14 +370,13 @@ export default function Subscriptions() {
             </div>
           </div>
           <p className="mt-3 text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl">
-            ₦53,800
+            ₦{dueThisWeekVal.toLocaleString("en-NG")}
           </p>
           <p className="mt-1 text-[11px] font-medium text-amber-500">
-            3 auto-debits upcoming
+            {dueThisWeekSubs.length} auto-debits upcoming
           </p>
         </div>
 
-        {/* Highest Expense */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-4 shadow-lg sm:p-5">
           <div className="flex items-center justify-between text-[#8F8A84]">
             <span className="text-xs font-medium">Highest Expense</span>
@@ -212,12 +385,13 @@ export default function Subscriptions() {
             </div>
           </div>
           <p className="mt-3 truncate text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl">
-            Adobe CC
+            {highestExpenseSub.name}
           </p>
-          <p className="mt-1 text-[11px] text-[#8F8A84]">₦45,000 / month</p>
+          <p className="mt-1 text-[11px] text-[#8F8A84]">
+            ₦{highestExpenseSub.rawAmount.toLocaleString("en-NG")} / month
+          </p>
         </div>
 
-        {/* Yearly Forecast */}
         <div className="rounded-2xl border border-white/[0.08] bg-[#141311] p-4 shadow-lg sm:p-5">
           <div className="flex items-center justify-between text-[#8F8A84]">
             <span className="text-xs font-medium">Yearly Forecast</span>
@@ -226,7 +400,7 @@ export default function Subscriptions() {
             </div>
           </div>
           <p className="mt-3 text-xl font-bold tracking-tight text-[#F5F5F5] sm:text-2xl">
-            ₦1.23M
+            {formattedYearlyForecast}
           </p>
           <p className="mt-1 text-[11px] text-[#8F8A84]">
             Projected annual spend
@@ -234,7 +408,6 @@ export default function Subscriptions() {
         </div>
       </div>
 
-      {/* 3. Search & Filter Bar */}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-md flex-1">
           <Search
@@ -250,11 +423,10 @@ export default function Subscriptions() {
           />
         </div>
 
-        {/* Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           {[
-            { id: "all", label: "All (6)" },
-            { id: "due", label: "Due Soon (3)" },
+            { id: "all", label: `All (${normalizedSubscriptions.length})` },
+            { id: "due", label: `Due Soon (${dueSoonCount})` },
             { id: "fx", label: "USD / Foreign FX" },
           ].map((tab) => (
             <button
@@ -272,7 +444,6 @@ export default function Subscriptions() {
         </div>
       </div>
 
-      {/* 4. Subscriptions Grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filteredSubscriptions.map((sub) => {
           const config =
@@ -285,7 +456,6 @@ export default function Subscriptions() {
               className="group relative flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#141311] p-5 transition-all duration-200 hover:border-[#C9733D]/40"
             >
               <div>
-                {/* Header: Category Icon + Title + Card Menu */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div
@@ -301,7 +471,7 @@ export default function Subscriptions() {
                         {sub.isFX && (
                           <span
                             className="inline-flex items-center gap-1 rounded-md border border-blue-500/30 bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-400"
-                            title="Billed in foreign currency (Subject to FX rates)"
+                            title="Billed in foreign currency"
                           >
                             <Globe size={10} /> USD
                           </span>
@@ -316,7 +486,6 @@ export default function Subscriptions() {
                   </button>
                 </div>
 
-                {/* Price Block */}
                 <div className="mt-5 flex items-baseline justify-between border-t border-white/[0.06] pt-4">
                   <span className="text-xs text-[#8F8A84]">Billing Amount</span>
                   <div className="text-right">
@@ -328,7 +497,6 @@ export default function Subscriptions() {
                 </div>
               </div>
 
-              {/* Card Footer: Renewal Countdown & Status */}
               <div className="mt-5 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 text-[#8F8A84]">
                   <Calendar size={13} />

@@ -4,6 +4,8 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { NavLink, useNavigate } from "react-router-dom";
 import authImage from "../assets/login.png";
 
+import { useAuth } from "../context/AuthContext";
+
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -14,7 +16,8 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const navigate = useNavigate();
-
+  const { Login } = useAuth();
+  
   async function handleSignUp(e) {
     e.preventDefault();
     setError("");
@@ -38,6 +41,7 @@ export default function Signup() {
       const data = await response.json();
 
       if (!response.ok) {
+        setError(data.message || "Sign-up failed");
         throw new Error(data.message || "Sign-up failed");
       }
       navigate("/Login");
@@ -47,10 +51,34 @@ export default function Signup() {
   }
 
   const login = useGoogleLogin({
-    onSuccess: (response) => console.log(response),
-    onError: () => console.log("Login failed"),
-  });
+    onSuccess: async (tokenResponse) => {
+      setError("");
+      try {
+        const res = await fetch("http://localhost:3000/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: tokenResponse.access_token }),
+        });
 
+        const data = await res.json();
+
+        console.log(data);
+
+        if (!res.ok) {
+          setError(data.message || "Log-in failed");
+          throw new Error(data.message || "Log-in failed");
+        }
+        console.log("Status:", res.status);
+        console.log("Response data:", data);
+
+        Login(data.user, data.token);
+        navigate("/dashboard");
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    onError: () => console.log("Google login failed"),
+  });
   return (
     <section className="min-h-screen bg-[#0F0E0D]">
       <div className="grid min-h-screen lg:grid-cols-2">
@@ -70,6 +98,12 @@ export default function Signup() {
               <p className="mt-5 mb-12 max-w-xs text-[17px] leading-8 text-[#A7A39C]">
                 Join Finora today and take control of your finances.
               </p>
+
+              {error && (
+                <div className="mb-4 rounded-lg border border-red-800 bg-red-950/40 p-3 text-sm text-red-400">
+                  {error}
+                </div>
+              )}
 
               <label
                 htmlFor="name"

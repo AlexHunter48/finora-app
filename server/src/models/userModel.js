@@ -16,13 +16,15 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.authProvider === "local";
+      },
       minlength: 6,
       select: false,
     },
     monoAccountId: {
-      type: String,
-      default: null,
+      type: [String],
+      default: [],
     },
     isVerified: {
       type: Boolean,
@@ -31,6 +33,11 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       default: null,
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
     },
   },
   {

@@ -1,9 +1,11 @@
 import bcrypt from "bcryptjs";
 
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 import userModel from "../models/userModel.js";
 import { config } from "../config/env.js";
+const client = new OAuth2Client(config.googleClientId);
 
 export const registerUser = async (req, res) => {
   try {
@@ -43,19 +45,80 @@ export const registerUser = async (req, res) => {
   }
 };
 
+export const googleAuth = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    const googleRes = await fetch(
+      `https://www.googleapis.com/oauth2/v3/userinfo`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    const { name, email, picture } = await googleRes.json();
+
+    let user = await userModel.findOne({ email });
+    console.log(user);
+    if (!user) {
+      user = await userModel.create({
+        name,
+        email,
+        avatar: picture,
+        authProvider: "google",
+        isVerified: true,
+      });
+    }
+
+    if (user.authProvider == "local") {
+      return res.status(400).json({
+        message:
+          "This email is registered with a password. Please sign in with your email and password.",
+      });
+    }
+
+    const jwtToken = jwt.sign({ id: user._id }, config.JWT, {
+      expiresIn: "1d",
+    });
+
+    res.status(200).json({
+      token: jwtToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({ message: "Google authentication failed" });
+  }
+};
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      return res.status(400).json({ message: "All fields are required" });
+
     const user = await userModel.findOne({ email }).select("+password");
-    if (!user)
-      return res
-        .status(400)
-        .json({ message: "User does not exist, kindly sign-up" });
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+
+    if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    if (!user.password || user.authProvider === "google") {
+      return res.status(400).json({
+        message:
+          "This account was created using Google. Please sign in with Google.",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
     const token = jwt.sign(
       {
@@ -75,8 +138,8 @@ export const loginUser = async (req, res) => {
         avatar: user.avatar,
       },
     });
-  } catch (err) {
-    console.log("Error logging in user:", err.message);
-    res.status(500).json({ message: "Error logging in user" });
+  } catch (error) {
+    console.error("Error logging in user:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

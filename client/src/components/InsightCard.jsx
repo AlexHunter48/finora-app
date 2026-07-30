@@ -1,8 +1,37 @@
+import React, { useState } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function InsightCard() {
+export default function InsightCard({
+  savingsAmount = 3500,
+  unusedCount = 2,
+  onDismiss,
+  onReview,
+}) {
+  const [isDismissed, setIsDismissed] = useState(false);
+  const navigate = useNavigate();
+
+  if (isDismissed) return null;
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    if (onDismiss) onDismiss();
+  };
+
+  const handleReview = () => {
+    if (onReview) {
+      onReview();
+    } else {
+      navigate("/dashboard/subscriptions");
+    }
+  };
+
+  const formattedSavings = `₦${Number(savingsAmount).toLocaleString()}`;
+  const subscriptionText = `${unusedCount} unused subscription${unusedCount === 1 ? "" : "s"}`;
+
   return (
-    <section className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-gradient-to-b from-[#1A1815] to-[#141311] p-5 text-[#F5F5F5] shadow-[0_30px_70px_rgba(0,0,0,0.45)] sm:p-6">
+    <section className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-gradient-to-b from-[#1A1815] to-[#141311] p-5 text-[#F5F5F5] shadow-[0_30px_70px_rgba(0,0,0,0.45)] transition-all duration-300 sm:p-6">
+      {/* Background Accent Glows */}
       <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-[#C9733D]/15 blur-[90px]" />
       <div className="bg-[#C9733D]/05 pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full blur-[90px]" />
 
@@ -20,23 +49,30 @@ export default function InsightCard() {
             </div>
 
             <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#F5F5F5] sm:text-2xl">
-              You could save <span className="text-[#C9733D]">₦3,500</span> this
+              You could save{" "}
+              <span className="text-[#C9733D]">{formattedSavings}</span> this
               month.
             </h2>
 
             <p className="mt-1.5 max-w-xl text-xs leading-relaxed font-normal text-[#8F8A84] sm:text-sm">
-              We detected 2 unused subscriptions. Cancelling them reduces your
+              We detected {subscriptionText}. Cancelling them reduces your
               recurring expenses without impacting your daily habits.
             </p>
           </div>
         </div>
 
         <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center lg:shrink-0">
-          <button className="rounded-xl border border-white/[0.08] bg-[#1D1C1A] px-4 py-3 text-xs font-semibold text-[#8F8A84] transition-all duration-200 hover:border-white/15 hover:bg-[#23211E] hover:text-[#F5F5F5] sm:px-5">
+          <button
+            onClick={handleDismiss}
+            className="rounded-xl border border-white/[0.08] bg-[#1D1C1A] px-4 py-3 text-xs font-semibold text-[#8F8A84] transition-all duration-200 hover:border-white/15 hover:bg-[#23211E] hover:text-[#F5F5F5] active:scale-[0.98] sm:px-5"
+          >
             Dismiss
           </button>
 
-          <button className="group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C9733D] to-[#D87F46] px-5 py-3 text-xs font-semibold text-white shadow-[0_4px_20px_rgba(201,115,61,0.25)] transition-all duration-200 hover:shadow-[0_6px_25px_rgba(201,115,61,0.4)] active:scale-[0.98]">
+          <button
+            onClick={handleReview}
+            className="group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C9733D] to-[#D87F46] px-5 py-3 text-xs font-semibold text-white shadow-[0_4px_20px_rgba(201,115,61,0.25)] transition-all duration-200 hover:shadow-[0_6px_25px_rgba(201,115,61,0.4)] active:scale-[0.98]"
+          >
             <span>Review Subscriptions</span>
             <ArrowRight
               size={15}
