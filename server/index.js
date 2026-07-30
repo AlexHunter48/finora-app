@@ -32,6 +32,9 @@ app.use("/api/auth", authRoute);
 
 app.use("/api/bank", bankRoute);
 
+app.get("/", (req, res) => {
+  res.send("Finora API is up and running!");
+});
 app.listen(config.port, (req, res) => {
   console.log(`Server running on port ${config.port}`);
 });
