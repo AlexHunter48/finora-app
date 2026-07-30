@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import heroBg from "../assets/hero-bg.png";
 import Button from "./Button";
 
 export default function Hero() {
+  const navigate = useNavigate();
   return (
     <section
       className="relative mt-16 min-h-screen w-full max-w-[1800px] bg-cover bg-[77%_center] bg-no-repeat md:bg-[88%_center] lg:bg-[90%_center]"
@@ -25,13 +27,19 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button className="hidden rounded-full bg-[#b37d3e] px-8 py-4 text-lg font-bold text-zinc-950 transition-all duration-200 hover:bg-[#c98d46] md:block">
+            <Button
+              className="hidden rounded-full bg-[#b37d3e] px-8 py-4 text-lg font-bold text-zinc-950 transition-all duration-200 hover:bg-[#c98d46] md:block"
+              onClick={() => navigate("/Sign-up")}
+            >
               Get started for free
             </Button>
 
-            <button className="w-fit rounded-full border border-gray-500 px-4 py-3 text-base font-bold text-white transition-all duration-200 hover:bg-white/10 md:block lg:px-8 lg:py-4 lg:text-lg">
+            <a
+              href="#how-it-works"
+              className="inline-block w-fit rounded-full border border-gray-500 px-4 py-3 text-center text-base font-bold text-white transition-all duration-200 hover:bg-white/10 md:block lg:px-8 lg:py-4 lg:text-lg"
+            >
               See how it works
-            </button>
+            </a>
           </div>
         </div>
 

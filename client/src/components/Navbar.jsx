@@ -37,7 +37,9 @@ function Navbar() {
           </li>
 
           <li className="whitespace-nowrap">
-            <Button className={"lg:py-2"}>Get started </Button>
+            <Button className={"lg:py-2"} onClick={() => navigate("/Sign-up")}>
+              Get started{" "}
+            </Button>
           </li>
         </ul>
       </nav>
