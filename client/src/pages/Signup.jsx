@@ -1,83 +1,43 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import authImage from "../assets/login.png";
-import { API_BASE_URL } from "../config/api";
 
-import { useAuth } from "../context/AuthContext";
+import useGoogleLoginApi from "../features/useGoogleLogin";
+import useSignUp from "../features/auth/useSignUp";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
+
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const navigate = useNavigate();
-  const { Login } = useAuth();
+  const {
+    googleSignIn,
+    isPending: googleSignUpLoading,
+    error: googleSignUpError,
+  } = useGoogleLoginApi();
+  const { signUp, isPending: signingUp, error: signUpError } = useSignUp();
 
   async function handleSignUp(e) {
     e.preventDefault();
-    setError("");
 
-    try {
-      if (password !== confirmPassword) {
-        throw new Error("Passwords must match");
-      }
-      const response = await fetch(`${API_BASE_URL}/auth/sign-up`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Sign-up failed");
-        throw new Error(data.message || "Sign-up failed");
-      }
-      navigate("/Login");
-    } catch (err) {
-      setError(err.message);
-    }
+    signUp({ name, email, password });
   }
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setError("");
-      try {
-        const res = await fetch(`${API_BASE_URL}/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: tokenResponse.access_token }),
-        });
-
-        const data = await res.json();
-
-        console.log(data);
-
-        if (!res.ok) {
-          setError(data.message || "Log-in failed");
-          throw new Error(data.message || "Log-in failed");
-        }
-
-        Login(data.user, data.token);
-        navigate("/dashboard");
-      } catch (error) {
-        console.error(error);
-      }
+      googleSignIn(tokenResponse.access_token);
     },
     onError: () => console.log("Google login failed"),
   });
+
+  const isLoading = googleSignUpLoading || signingUp;
+  const error = googleSignUpError || signUpError;
   return (
     <section className="min-h-screen bg-[#0F0E0D]">
       <div className="grid min-h-screen lg:grid-cols-2">
@@ -98,7 +58,7 @@ export default function Signup() {
 
             {error && (
               <div className="mb-4 rounded-xl border border-red-800 bg-red-950/40 p-3 text-sm text-red-400">
-                {error}
+                {error.message || "Log in failed."}
               </div>
             )}
 
@@ -199,9 +159,35 @@ export default function Signup() {
 
               <button
                 type="submit"
+                disabled={isLoading}
                 className="mt-2 h-12 w-full rounded-xl bg-gradient-to-r from-[#C96F35] to-[#E08C49] font-semibold tracking-wide text-[#111111] shadow-lg shadow-[#C96F35]/20 transition-all duration-300 hover:shadow-xl hover:shadow-[#C96F35]/35 active:scale-[0.99]"
               >
-                Create account
+                {signingUp ? (
+                  <>
+                    <svg
+                      className="h-5 w-5 animate-spin text-white"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    <span>Creating account...</span>
+                  </>
+                ) : (
+                  <span>Create account</span>
+                )}
               </button>
 
               <div className="flex items-center gap-3">
@@ -212,6 +198,7 @@ export default function Signup() {
 
               <button
                 type="button"
+                disabled={isLoading}
                 onClick={() => login()}
                 className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] text-sm text-[#F5F5F4] transition-all duration-300 hover:border-white/15 hover:bg-white/[0.04]"
               >
@@ -233,7 +220,32 @@ export default function Signup() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Continue with Google
+                {googleSignUpLoading ? (
+                  <>
+                    <svg
+                      className="h-5 w-5 animate-spin text-gray-700"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    <span>Signing in with Google...</span>
+                  </>
+                ) : (
+                  <span>Continue with Google</span>
+                )}
               </button>
 
               <p className="text-center text-xs text-[#99948D]">
