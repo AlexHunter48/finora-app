@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 
 export default function MainLayout() {
   return (
-    <div className="max-w-[1800px] divide-amber-300">
+    <div className="mx-auto max-w-[1800px] divide-amber-300">
       <Navbar />
       <Hero />
       <Features />

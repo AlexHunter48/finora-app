@@ -10,9 +10,9 @@ function Navbar() {
 
   return (
     <header
-      className={`${isOpen ? "h-dvh bg-[#0F0E0D]/98" : ""} max-w- fixed top-0 z-50 h-16 w-full bg-[#0F0E0D] lg:h-16`}
+      className={`${isOpen ? "h-dvh bg-[#0F0E0D]/98" : ""} max-w- fixed top-0 z-50 h-16 w-full max-w-[1600px] bg-[#0F0E0D] lg:h-16`}
     >
-      <nav className="mx-auto flex h-16 w-full items-center justify-between gap-4 px-4 py-4 text-sm text-gray-200 md:px-6 lg:gap-8 lg:text-base">
+      <nav className="mx-auto flex h-16 w-full items-center justify-between gap-4 px-4 py-4 text-sm text-gray-200 md:px-6 lg:gap-8 lg:text-base xl:px-18">
         <span className="text-2xl font-bold tracking-[0.15em] uppercase md:tracking-[0.2em] lg:tracking-[0.3em]">
           Finora
         </span>

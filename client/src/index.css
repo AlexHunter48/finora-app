@@ -10,6 +10,21 @@
   }
 }
 
+.hero-bg {
+  background-position: 65% center;
+}
+
+@media (min-width: 768px) {
+  .hero-bg {
+    background-position: 75% center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-bg {
+    background-position: 85% center;
+  }
+}
 html {
   scroll-behavior: smooth;
 }
