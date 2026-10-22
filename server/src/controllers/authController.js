@@ -61,7 +61,7 @@ export const googleAuth = async (req, res) => {
     const { name, email, picture } = await googleRes.json();
 
     let user = await userModel.findOne({ email });
-    console.log(user);
+
     if (!user) {
       user = await userModel.create({
         name,
@@ -90,6 +90,7 @@ export const googleAuth = async (req, res) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        monoAccountId: user.monoAccountId || [],
       },
     });
   } catch (error) {
@@ -136,8 +137,10 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        monoAccountId: user.monoAccountId || [],
       },
     });
+    console.log(user);
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Server error" });

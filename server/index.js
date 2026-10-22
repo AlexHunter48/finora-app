@@ -17,7 +17,10 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ["https://finora-app-self.vercel.app"],
+    origin: [
+      "https://finora-66k1w3bfb-hunters-projects-fd8d2db7.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
   }),
 );

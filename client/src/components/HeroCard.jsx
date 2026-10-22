@@ -37,7 +37,7 @@ export default function HeroCard() {
             <div className="col-span-5 sm:col-span-5">
               <h1 className="text-2xl font-semibold tracking-tight text-[#F5F5F5] sm:text-3xl">
                 ₦
-                {monthlySpend.toLocaleString("en-NG", {
+                {monthlySpend?.toLocaleString("en-NG", {
                   minimumFractionDigits: 2,
                 })}
               </h1>

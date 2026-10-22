@@ -31,7 +31,7 @@ export const connectBank = async (req, res) => {
       { $addToSet: { monoAccountId: accountId } },
       { returnDocument: "after" },
     );
-    console.log(updatedUser);
+   
     res.status(200).json({
       success: true,
       message: "Bank account linked successfully",

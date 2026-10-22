@@ -12,6 +12,7 @@ import RecentTransactions from "../components/RecentTransactions";
 import InsightCard from "../components/InsightCard";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
+import useGetBankData from "../features/bank/useGetBankData";
 
 export default function Overview() {
   const { isOpen, setIsOpen } = useDash();
@@ -21,8 +22,8 @@ export default function Overview() {
 
   const initial = user.name.split(" ")[0];
 
-  console.log(initial, user.name);
-
+  console.log(user);
+  const { bankData, isPending, error } = useGetBankData({ user, token });
   const emoji = "👋";
 
   useEffect(() => {
@@ -54,7 +55,6 @@ export default function Overview() {
           });
 
           const result = await response.json();
-          console.log(result);
 
           if (result.success) {
             console.log("Connected! Permanent Account ID:", result.accountId);
@@ -84,7 +84,7 @@ export default function Overview() {
     monoInstance.setup();
     monoInstance.open();
   };
-
+  console.log(user);
   return (
     <section className="min-h-dvh overflow-y-auto bg-[#0F0E0D] px-5 pt-6 pb-28 lg:px-10 lg:py-10">
       <header className="mb-8 flex items-center justify-between lg:hidden">

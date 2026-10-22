@@ -14,6 +14,7 @@ export default function useLogin() {
     mutationFn: login,
     onSuccess: (data) => {
       Login(data.user, data.token);
+      console.log("data-user", data.user);
       navigate("/dashboard");
     },
   });

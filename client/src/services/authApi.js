@@ -13,7 +13,7 @@ export async function login({ email, password }) {
   if (!response.ok) {
     throw new Error(data.message || "Log-in failed");
   }
-
+  console.log("data", data);
   return data;
 }
 
