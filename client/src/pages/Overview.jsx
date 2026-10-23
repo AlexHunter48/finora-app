@@ -13,17 +13,21 @@ import InsightCard from "../components/InsightCard";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import useGetBankData from "../features/bank/useGetBankData";
+import { ManageAccountsModal } from "../components/ManageAccountModal";
+import { useTransactions } from "../context/TransactionsContext";
 
 export default function Overview() {
   const { isOpen, setIsOpen } = useDash();
+  const [modalOpen, setModalOpen] = useState(false);
+
   const { token, user, setUser } = useAuth();
   const [greeting, setGreeting] = useState("");
   const [isBankConnected, setIsBankConnected] = useState(false);
 
   const initial = user.name.split(" ")[0];
 
-  console.log(user);
   const { bankData, isPending, error } = useGetBankData({ user, token });
+  const { selectedAccountId, setSelectedAccountId } = useTransactions();
   const emoji = "👋";
 
   useEffect(() => {
@@ -84,7 +88,7 @@ export default function Overview() {
     monoInstance.setup();
     monoInstance.open();
   };
-  console.log(user);
+
   return (
     <section className="min-h-dvh overflow-y-auto bg-[#0F0E0D] px-5 pt-6 pb-28 lg:px-10 lg:py-10">
       <header className="mb-8 flex items-center justify-between lg:hidden">
@@ -139,17 +143,26 @@ export default function Overview() {
       </div>
 
       {user?.monoAccountId?.length > 0 ? (
-        <div className="mb-4 flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-500" />
-            <p className="text-sm font-medium text-neutral-200">
-              Bank Account Linked
-            </p>
+        <>
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-500" />
+              <p className="text-sm font-medium text-neutral-200">
+                Bank Account Linked
+              </p>
+            </div>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="text-xs text-neutral-400 underline hover:text-white"
+            >
+              Manage Accounts
+            </button>
           </div>
-          <button className="text-xs text-neutral-400 underline hover:text-white">
-            Manage Accounts
-          </button>
-        </div>
+          <ManageAccountsModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
+        </>
       ) : (
         <div className="mb-6 flex flex-col items-start justify-between gap-4 rounded-3xl border border-[#C9733D]/30 bg-[#1B1A18] p-6 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">

@@ -1,7 +1,10 @@
 import { API_BASE_URL } from "../config/api";
+export async function getBankData({ token, monoAccountId }) {
+  const url = monoAccountId
+    ? `${API_BASE_URL}/bank/transactions?monoAccountId=${monoAccountId}`
+    : `${API_BASE_URL}/bank/transactions`;
 
-export async function getBankData({ token }) {
-  const response = await fetch(`${API_BASE_URL}/bank/transactions`, {
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

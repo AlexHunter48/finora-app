@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import { useAuth } from "./AuthContext";
 import useGetBankData from "../features/bank/useGetBankData";
@@ -7,7 +7,12 @@ const TransactionContext = createContext();
 
 export function TransactionProvider({ children }) {
   const { user, token } = useAuth();
-  const { bankData, isPending } = useGetBankData({ user, token });
+  const [selectedAccountId, setSelectedAccountId] = useState(null);
+  const { bankData, isPending } = useGetBankData({
+    user,
+    token,
+    monoAccountId: selectedAccountId,
+  });
   // useEffect(() => {
   //   const accountId = user?.monoAccountId?.[0];
   //   if (!accountId || !token) return;
@@ -40,7 +45,14 @@ export function TransactionProvider({ children }) {
   //   }
 
   //   getTransactions();
+
   // }, [user?.monoAccountId, token]);
+
+  useEffect(() => {
+    if (user?.monoAccountId?.length > 0 && !selectedAccountId) {
+      setSelectedAccountId(user.monoAccountId[0]);
+    }
+  }, [selectedAccountId, user?.monoAccountId]);
 
   const transactions = bankData?.data;
 
@@ -116,6 +128,8 @@ export function TransactionProvider({ children }) {
         isPending,
         monthlySpend,
         monthlyTransactions,
+        selectedAccountId,
+        setSelectedAccountId,
         currentMonth,
 
         currentYear,
