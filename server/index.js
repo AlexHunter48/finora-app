@@ -7,6 +7,9 @@ import connectDB from "./src/config/db.js";
 import authRoute from "./src/routes/authRoute.js";
 
 import bankRoute from "./src/routes/bankRoute.js";
+
+import userRoute from "./src/routes/userRoute.js";
+
 connectDB();
 
 const app = express();
@@ -34,6 +37,8 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoute);
 
 app.use("/api/bank", bankRoute);
+
+app.use("/api/profile", userRoute);
 
 app.get("/", (req, res) => {
   res.send("Finora API is up and running!");

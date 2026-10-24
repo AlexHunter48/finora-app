@@ -15,6 +15,7 @@ import { API_BASE_URL } from "../config/api";
 import useGetBankData from "../features/bank/useGetBankData";
 import { ManageAccountsModal } from "../components/ManageAccountModal";
 import { useTransactions } from "../context/TransactionsContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Overview() {
   const { isOpen, setIsOpen } = useDash();
@@ -61,7 +62,6 @@ export default function Overview() {
           const result = await response.json();
 
           if (result.success) {
-            console.log("Connected! Permanent Account ID:", result.accountId);
             setIsBankConnected(true);
 
             setUser((prevUser) => {
@@ -74,6 +74,7 @@ export default function Overview() {
               };
 
               localStorage.setItem("user", JSON.stringify(updatedUser));
+              setSelectedAccountId(result.accountId);
 
               return updatedUser;
             });
@@ -161,6 +162,7 @@ export default function Overview() {
           <ManageAccountsModal
             isOpen={modalOpen}
             onClose={() => setModalOpen(false)}
+            connectBank={handleConnectBank}
           />
         </>
       ) : (

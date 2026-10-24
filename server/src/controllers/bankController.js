@@ -31,7 +31,7 @@ export const connectBank = async (req, res) => {
       { $addToSet: { monoAccountId: accountId } },
       { returnDocument: "after" },
     );
-   
+
     res.status(200).json({
       success: true,
       message: "Bank account linked successfully",
@@ -45,6 +45,47 @@ export const connectBank = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to link bank account",
+    });
+  }
+};
+
+export const unlinkAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { accountId } = req.body;
+
+    if (!accountId) {
+      return res.status(400).json({ message: "Account ID is required" });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userIds = user?.monoAccountId || [];
+
+    if (!userIds.includes(accountId)) {
+      return res
+        .status(401)
+        .json({ message: "User is unauthorized to perform this action" });
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { $pull: { monoAccountId: accountId } },
+      { returnDocument: "after" },
+    );
+
+    return res.status(200).json({
+      message: "Account unlinked successfully",
+      monoAccountId: updatedUser.monoAccountId,
+    });
+  } catch (error) {
+    console.error("Error unlinking account:", error);
+    return res.status(500).json({
+      message: "Error unlinking account",
+      error: error.message,
     });
   }
 };
