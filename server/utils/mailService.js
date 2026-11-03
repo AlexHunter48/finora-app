@@ -16,7 +16,7 @@ export const sendRenewalAlert = async (userEmail, subscription) => {
       from: `"Finora Watchdog" <${process.env.SMTP_FROM}>`,
       to: userEmail,
       subject: `⚠️ Action Required: ${subscription.name} renews soon`,
-      text: `Hi,\n\nYour subscription to ${subscription.name} (${subscription.currency} ${subscription.amount}) is due for renewal on ${new Date(subscription.dueDate).toDateString()}.\n\nEnsure your card has sufficient funds to avoid service interruption.\n\n- Finora`,
+      text: `Hi,\n\nYour subscription to ${subscription.name} (${subscription.currency} ${subscription.amount}) is due for renewal on ${new Date(subscription.dueDate).toLocaleDateString("en-US", { timeZone: "UTC", dateStyle: "long" })}.\n\nEnsure your card has sufficient funds to avoid service interruption.\n\n- Finora`,
     };
 
     await transporter.sendMail(mailOptions);
