@@ -10,6 +10,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useTransactions } from "../context/TransactionsContext";
+import { useNavigate } from "react-router-dom";
 
 // Custom Brand Logos
 const NetflixLogo = () => (
@@ -30,7 +31,6 @@ const UberLogo = () => (
   </svg>
 );
 
-// Helper to format dates into human-readable strings ("Today, 9:42 AM", "Yesterday", "July 24")
 const formatTxDate = (rawDate) => {
   if (!rawDate) return "Recent";
   const date = new Date(rawDate);
@@ -54,7 +54,6 @@ const formatTxDate = (rawDate) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-// Helper to select an icon and theme based on category/narration
 const getTxStyle = (title = "", category = "", isIncome = false) => {
   const query = `${title} ${category}`.toLowerCase();
 
@@ -106,7 +105,6 @@ const getTxStyle = (title = "", category = "", isIncome = false) => {
   };
 };
 
-// Clean up raw category strings (e.g. "food_and_drink" -> "Food And Drink")
 const formatCategoryName = (rawCat) => {
   if (typeof rawCat !== "string" || !rawCat.trim()) return "General";
   return rawCat
@@ -117,8 +115,8 @@ const formatCategoryName = (rawCat) => {
 
 export default function RecentTransactions() {
   const { transactions = [] } = useTransactions();
+  const navigate = useNavigate();
 
-  // Process, sort (newest first), and select top 5 transactions
   const recentList = useMemo(() => {
     return [...transactions]
       .sort((a, b) => {
@@ -163,7 +161,7 @@ export default function RecentTransactions() {
     <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#141311] p-5 text-[#F5F5F5] shadow-[0_30px_70px_rgba(0,0,0,0.45)] sm:p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs text-[#8F8A84]">Recent Activity</p>
+          <p className="text-xs text-[#8F8A84]">Recent Activity </p>
           <h3 className="mt-1 text-2xl font-semibold tracking-tight text-[#F5F5F5]">
             Transactions
           </h3>
@@ -238,7 +236,10 @@ export default function RecentTransactions() {
         )}
       </div>
 
-      <button className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#1D1C1A] py-3 text-xs font-semibold text-[#C9733D] transition hover:border-[#C9733D]/40 hover:bg-[#23211E]">
+      <button
+        onClick={() => navigate("transactions")}
+        className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#1D1C1A] py-3 text-xs font-semibold text-[#C9733D] transition hover:border-[#C9733D]/40 hover:bg-[#23211E]"
+      >
         <span>View All Transactions</span>
         <ChevronRight size={14} />
       </button>

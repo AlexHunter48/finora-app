@@ -54,7 +54,7 @@ export function TransactionProvider({ children }) {
     }
   }, [selectedAccountId, user?.monoAccountId]);
 
-  const transactions = bankData?.data;
+  const transactions = bankData?.transactions;
 
   const debits = transactions?.filter((t) => t.type === "debit");
   const credits = transactions?.filter((t) => t.type === "credit");

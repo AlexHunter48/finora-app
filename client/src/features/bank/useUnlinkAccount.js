@@ -10,7 +10,8 @@ export default function useUnlinkAccount() {
   } = useMutation({
     mutationFn: unlinkAccount,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bank-transactions"] });
+      (queryClient.invalidateQueries({ queryKey: ["bank-transactions"] }),
+        queryClient.invalidateQueries({ queryKey: ["user"] }));
     },
   });
 

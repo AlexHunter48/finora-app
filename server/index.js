@@ -10,9 +10,14 @@ import bankRoute from "./src/routes/bankRoute.js";
 
 import userRoute from "./src/routes/userRoute.js";
 
+import subscriptionRoute from "./src/routes/subscriptionRoute.js";
+import { initRenewalWatchdog } from "./src/jobs/renewalWatchdog.js";
+
 connectDB();
 
 const app = express();
+
+initRenewalWatchdog();
 
 const PORT = process.env.PORT || 3000;
 
@@ -39,6 +44,8 @@ app.use("/api/auth", authRoute);
 app.use("/api/bank", bankRoute);
 
 app.use("/api/profile", userRoute);
+
+app.use("/api/subscription", subscriptionRoute);
 
 app.get("/", (req, res) => {
   res.send("Finora API is up and running!");

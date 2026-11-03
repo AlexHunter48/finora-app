@@ -15,7 +15,6 @@ import { API_BASE_URL } from "../config/api";
 import useGetBankData from "../features/bank/useGetBankData";
 import { ManageAccountsModal } from "../components/ManageAccountModal";
 import { useTransactions } from "../context/TransactionsContext";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function Overview() {
   const { isOpen, setIsOpen } = useDash();
@@ -25,7 +24,10 @@ export default function Overview() {
   const [greeting, setGreeting] = useState("");
   const [isBankConnected, setIsBankConnected] = useState(false);
 
-  const initial = user.name.split(" ")[0];
+  const initial = user?.name?.split(" ")[0] || "";
+
+  console.log("Initial:", initial);
+  console.log("user:", user?.name);
 
   const { bankData, isPending, error } = useGetBankData({ user, token });
   const { selectedAccountId, setSelectedAccountId } = useTransactions();
@@ -35,15 +37,15 @@ export default function Overview() {
     const hour = new Date().getHours();
 
     if (hour >= 5 && hour < 12) {
-      setGreeting(`Good morning ${initial} ${emoji}`);
+      setGreeting(`Good morning  ${initial} ${emoji}`);
     } else if (hour >= 12 && hour < 17) {
-      setGreeting(`Good afternoon ${initial} ${emoji}`);
+      setGreeting(`Good afternoon  ${emoji}`);
     } else if (hour >= 17 && hour < 22) {
-      setGreeting(`Good evening ${initial} ${emoji}`);
+      setGreeting(`Good evening  ${initial}  ${emoji}`);
     } else {
       setGreeting("Hello, night owl");
     }
-  }, []);
+  }, [initial]);
 
   const handleConnectBank = () => {
     const monoInstance = new MonoConnect({

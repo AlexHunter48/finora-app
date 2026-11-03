@@ -13,7 +13,7 @@ export default function useLogin() {
   } = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      Login(data.user, data.token);
+      Login(data.token);
       console.log("data-user", data.user);
       navigate("/dashboard");
     },

@@ -5,7 +5,8 @@ import { Eye, EyeOff, Lock } from "lucide-react";
 import heroBg from "../assets/login.png";
 
 import useLogin from "../features/auth/useLogin";
-import useGoogleLoginApi from "../features/useGoogleLogin";
+import useGoogleLoginApi from "../features/auth/useGoogleLogin";
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 

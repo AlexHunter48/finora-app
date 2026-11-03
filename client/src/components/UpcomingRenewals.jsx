@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Calendar, ChevronRight, CreditCard } from "lucide-react";
-import { useTransactions } from "../context/TransactionsContext";
+import useSubscriptions from "../features/subscription/useGetSubscriptions";
+import { useNavigate } from "react-router-dom";
 
-// Custom Brand Logos
 const NetflixLogo = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#E50914]">
     <path d="M5.398 0v24h4.131l.036-12.871 4.965 12.871h4.072V0h-4.072l-.036 12.871L9.529 0H5.398z" />
@@ -26,54 +26,6 @@ const ChatGPTLogo = () => (
     <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.259 23.5a6.0414 6.0414 0 0 0 5.7602-4.1818 5.9847 5.9847 0 0 0 3.9977-2.9 6.0558 6.0558 0 0 0-.735-7.0971z" />
   </svg>
 );
-
-// Fallback static list if no subscriptions are found in Mono context
-const DEFAULT_SUBSCRIPTIONS = [
-  {
-    id: "sub-1",
-    name: "Netflix",
-    plan: "Premium 4K",
-    dueTag: "Today",
-    isDueToday: true,
-    amountFormatted: "₦6,500",
-    billingCycle: "Monthly",
-    IconComponent: NetflixLogo,
-    badgeBg: "bg-[#E50914]/10 border-[#E50914]/20",
-  },
-  {
-    id: "sub-2",
-    name: "Spotify",
-    plan: "Individual",
-    dueTag: "In 3 days",
-    isDueToday: false,
-    amountFormatted: "₦2,300",
-    billingCycle: "Monthly",
-    IconComponent: SpotifyLogo,
-    badgeBg: "bg-[#1DB954]/10 border-[#1DB954]/20",
-  },
-  {
-    id: "sub-3",
-    name: "YouTube",
-    plan: "Premium",
-    dueTag: "In 8 days",
-    isDueToday: false,
-    amountFormatted: "₦3,200",
-    billingCycle: "Monthly",
-    IconComponent: YouTubeLogo,
-    badgeBg: "bg-[#FF0000]/10 border-[#FF0000]/20",
-  },
-  {
-    id: "sub-4",
-    name: "ChatGPT Plus",
-    plan: "Pro Plan",
-    dueTag: "In 12 days",
-    isDueToday: false,
-    amountFormatted: "₦32,000",
-    billingCycle: "Monthly",
-    IconComponent: ChatGPTLogo,
-    badgeBg: "bg-[#10A37F]/10 border-[#10A37F]/20",
-  },
-];
 
 const getSubscriptionStyle = (title = "") => {
   const query = title.toLowerCase();
@@ -111,80 +63,42 @@ const getSubscriptionStyle = (title = "") => {
 };
 
 export default function UpcomingRenewals() {
-  const { transactions = [] } = useTransactions();
+  const { data: subscriptions = [], isLoading } = useSubscriptions();
+  const navigate = useNavigate();
 
-  // Scan live transactions for recurring subscription items
-  const liveSubscriptions = useMemo(() => {
-    const detected = [];
-    const seenNames = new Set();
+  const renewalItems = useMemo(() => {
+    const now = new Date();
 
-    transactions.forEach((tx) => {
-      const isDebit = tx.type?.toLowerCase() === "debit";
-      if (!isDebit) return;
+    return subscriptions
+      .slice(0, 5)
+      .filter((sub) => sub.status === "active")
+      .map((sub) => {
+        const targetDate = new Date(sub.dueDate);
+        const diffTime = targetDate.getTime() - now.getTime();
+        const diffDays = Math.max(
+          0,
+          Math.ceil(diffTime / (1000 * 60 * 60 * 24)),
+        );
 
-      const title = tx.narration || tx.name || tx.title || "";
-      const lower = title.toLowerCase();
-      const rawCat = (tx.category?.name || tx.category || "").toLowerCase();
+        const isDueToday = diffDays === 0;
+        const dueTag = isDueToday ? "Due Today" : `In ${diffDays} days`;
+        const { icon, badgeBg, plan } = getSubscriptionStyle(sub.name);
 
-      const isSub =
-        rawCat.includes("sub") ||
-        lower.includes("netflix") ||
-        lower.includes("spotify") ||
-        lower.includes("youtube") ||
-        lower.includes("chatgpt") ||
-        lower.includes("apple") ||
-        lower.includes("dstv");
-
-      if (isSub) {
-        // Extract merchant name (e.g., "Netflix" out of "Netflix Subscription")
-        let brandName = title;
-        if (lower.includes("netflix")) brandName = "Netflix";
-        else if (lower.includes("spotify")) brandName = "Spotify";
-        else if (lower.includes("youtube")) brandName = "YouTube";
-        else if (lower.includes("chatgpt")) brandName = "ChatGPT Plus";
-
-        if (!seenNames.has(brandName)) {
-          seenNames.add(brandName);
-
-          const rawAmount = Math.abs(Number(tx.amount) || 0) / 100;
-          const { icon, badgeBg, plan } = getSubscriptionStyle(brandName);
-
-          // Calculate next renewal (assuming monthly cycle from last date)
-          const lastDate = new Date(
-            tx.date || tx.createdAt || tx.created_at || Date.now(),
-          );
-          const nextDate = new Date(lastDate);
-          nextDate.setMonth(nextDate.getMonth() + 1);
-
-          const diffDays = Math.ceil(
-            (nextDate - new Date()) / (1000 * 60 * 60 * 24),
-          );
-          let dueTag = diffDays <= 0 ? "Due Today" : `In ${diffDays} days`;
-          const isDueToday = diffDays <= 0;
-
-          detected.push({
-            id: tx.id || tx._id || Math.random().toString(),
-            name: brandName,
-            plan,
-            dueTag,
-            isDueToday,
-            amountFormatted: `₦${rawAmount.toLocaleString(undefined, {
-              maximumFractionDigits: 0,
-            })}`,
-            billingCycle: "Monthly",
-            IconComponent: icon,
-            badgeBg,
-          });
-        }
-      }
-    });
-
-    return detected;
-  }, [transactions]);
-
-  // Use dynamic list if subscriptions were found; otherwise display the full default set
-  const displayList =
-    liveSubscriptions.length > 0 ? liveSubscriptions : DEFAULT_SUBSCRIPTIONS;
+        return {
+          id: sub._id || sub.id,
+          name: sub.name,
+          plan: sub.plan || plan,
+          dueTag,
+          isDueToday,
+          diffDays,
+          amountFormatted: `₦${sub.amount.toLocaleString("en-NG")}`,
+          billingCycle: sub.frequency === "monthly" ? "Monthly" : "Yearly",
+          IconComponent: icon,
+          badgeBg,
+        };
+      })
+      .sort((a, b) => a.diffDays - b.diffDays);
+  }, [subscriptions]);
 
   return (
     <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#141311] p-5 text-[#F5F5F5] shadow-[0_30px_70px_rgba(0,0,0,0.45)] sm:p-6">
@@ -201,69 +115,86 @@ export default function UpcomingRenewals() {
         </button>
       </div>
 
-      <div className="space-y-3">
-        {displayList.map((item) => {
-          const { IconComponent } = item;
+      {isLoading ? (
+        <div className="py-6 text-center text-xs text-[#8F8A84]">
+          Loading renewals...
+        </div>
+      ) : renewalItems.length === 0 ? (
+        <div className="py-6 text-center text-xs text-[#8F8A84]">
+          No active renewals found.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {renewalItems.map((item) => {
+            const { IconComponent } = item;
 
-          return (
-            <div
-              key={item.id}
-              className="group flex items-center justify-between rounded-xl border border-white/[0.04] bg-[#1A1917]/70 p-3.5 transition-all duration-200 hover:border-[#C9733D]/40 hover:bg-[#1A1917] active:scale-[0.99]"
-            >
-              <div className="flex min-w-0 items-center gap-3.5">
-                <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border shadow-sm ${item.badgeBg}`}
-                >
-                  <IconComponent />
-                </div>
-
-                <div className="min-w-0 text-left">
-                  <div className="flex items-center gap-2">
-                    <h4 className="truncate text-sm font-semibold text-[#F5F5F5]">
-                      {item.name}
-                    </h4>
-                    <span
-                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
-                        item.isDueToday
-                          ? "border border-[#C9733D]/30 bg-[#C9733D]/10 text-[#C9733D]"
-                          : "bg-white/[0.06] text-[#8F8A84]"
-                      }`}
-                    >
-                      {item.dueTag}
-                    </span>
+            return (
+              <div
+                key={item.id}
+                className="group flex items-center justify-between rounded-xl border border-white/[0.04] bg-[#1A1917]/70 p-3.5 transition-all duration-200 hover:border-[#C9733D]/40 hover:bg-[#1A1917] active:scale-[0.99]"
+              >
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border shadow-sm ${item.badgeBg}`}
+                  >
+                    <IconComponent />
                   </div>
 
-                  <p className="mt-0.5 truncate text-[12px] text-[#8F8A84]">
-                    {item.plan} •{" "}
-                    <span
-                      className={
-                        item.isDueToday ? "text-[#C9733D]" : "text-[#8F8A84]"
-                      }
-                    >
-                      {item.isDueToday ? "Due Today" : item.dueTag}
-                    </span>
-                  </p>
-                </div>
-              </div>
+                  <div className="min-w-0 text-left">
+                    <div className="flex items-center gap-2">
+                      <h4 className="truncate text-sm font-semibold text-[#F5F5F5]">
+                        {item.name}
+                      </h4>
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                          item.isDueToday
+                            ? "border border-[#C9733D]/30 bg-[#C9733D]/10 text-[#C9733D]"
+                            : "bg-white/[0.06] text-[#8F8A84]"
+                        }`}
+                      >
+                        {item.dueTag}
+                      </span>
+                    </div>
 
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <span className="block text-sm font-semibold text-[#F5F5F5]">
-                    {item.amountFormatted}
-                  </span>
-                  <span className="block text-[10px] text-[#8F8A84]">
-                    {item.billingCycle}
-                  </span>
+                    <p className="mt-0.5 truncate text-[12px] text-[#8F8A84]">
+                      {item.plan} •{" "}
+                      <span
+                        className={
+                          item.isDueToday ? "text-[#C9733D]" : "text-[#8F8A84]"
+                        }
+                      >
+                        {item.isDueToday ? "Due Today" : item.dueTag}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <ChevronRight
-                  size={16}
-                  className="text-[#8F8A84] transition group-hover:translate-x-0.5 group-hover:text-[#F5F5F5]"
-                />
+
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    <span className="block text-sm font-semibold text-[#F5F5F5]">
+                      {item.amountFormatted}
+                    </span>
+                    <span className="block text-[10px] text-[#8F8A84]">
+                      {item.billingCycle}
+                    </span>
+                  </div>
+                  <ChevronRight
+                    size={16}
+                    className="text-[#8F8A84] transition group-hover:translate-x-0.5 group-hover:text-[#F5F5F5]"
+                  />
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+          <button
+            onClick={() => navigate("subscriptions")}
+            className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#1D1C1A] py-3 text-xs font-semibold text-[#C9733D] transition hover:border-[#C9733D]/40 hover:bg-[#23211E]"
+          >
+            <span> All Subscriptions</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

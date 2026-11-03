@@ -18,5 +18,7 @@ export async function getCurrentUser({ token }) {
     }
     throw new Error(result.message || "Failed to fetch");
   }
+
+  console.log("Result:", result);
   return result;
 }

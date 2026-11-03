@@ -4,8 +4,8 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { NavLink } from "react-router-dom";
 import authImage from "../assets/login.png";
 
-import useGoogleLoginApi from "../features/useGoogleLogin";
 import useSignUp from "../features/auth/useSignUp";
+import useGoogleLoginApi from "../features/auth/useGoogleLogin";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
