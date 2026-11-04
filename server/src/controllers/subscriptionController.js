@@ -163,20 +163,33 @@ const detectSubscriptionFromNarration = (narration) => {
   const text = narration.toLowerCase();
 
   const knownMerchants = [
-    { name: "Netflix", keywords: ["netflix", "net-flix"] },
-    { name: "Spotify", keywords: ["spotify"] },
-    { name: "Apple", keywords: ["apple.com", "itunes", "icloud"] },
-    { name: "Google", keywords: ["google", "youtube premium"] },
-    { name: "DSTV", keywords: ["dstv", "multichoice"] },
+    {
+      name: "Netflix",
+      category: "Entertainment",
+      keywords: ["netflix", "net-flix"],
+    },
+    { name: "Spotify", category: "Entertainment", keywords: ["spotify"] },
+    {
+      name: "Apple",
+      category: "Technology",
+      keywords: ["apple.com", "itunes", "icloud"],
+    },
+    {
+      name: "Google",
+      category: "Technology",
+      keywords: ["google", "youtube premium"],
+    },
+    { name: "DSTV", category: "Utilities", keywords: ["dstv", "multichoice"] },
     {
       name: "Internet / Data",
+      category: "Utilities",
       keywords: ["spectranet", "swift", "mtn sub", "glo sub"],
     },
   ];
 
   for (const merchant of knownMerchants) {
     if (merchant.keywords.some((keyword) => text.includes(keyword))) {
-      return merchant.name;
+      return merchant;
     }
   }
   return null;
@@ -223,7 +236,8 @@ export const importBankStatement = async (req, res) => {
 
         const newSub = await subscriptionsModel.create({
           userId: userId,
-          name: merchantName,
+          name: merchantName.name,
+          category: merchantName.category,
           amount: detectedAmount > 0 ? detectedAmount : 5000,
           dueDate: testDueDate,
           status: "active",
