@@ -2,19 +2,39 @@ import cron from "node-cron";
 
 import { sendRenewalAlert } from "../../utils/mailService.js";
 import subscriptionsModel from "../models/subscriptionsModel.js";
-
+import systemMetaModel from "../models/systemMetaModel.js";
 let isRunning = false;
-let lastRunDate = null;
+
+const getLastRunDate = async () => {
+  const meta = await systemMetaModel.findOne({ key: "watchdog_last_run" });
+  return meta ? meta.value : null;
+};
+
+const setLastRunDate = async (dateStr) => {
+  await systemMetaModel.findOneAndUpdate(
+    { key: "watchdog_last_run" },
+    { value: dateStr },
+    { upsert: true, returnDocument: "after" },
+  );
+};
 
 export const runWatchdogCheck = async () => {
   if (isRunning) {
     console.log(
-      " Watchdog check already in progress, skipping overlapping run.",
+      "⚠️ Watchdog check already in progress, skipping overlapping run.",
     );
     return { success: false, reason: "Already running" };
   }
 
   try {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const lastRun = await getLastRunDate();
+
+    if (lastRun === todayStr) {
+      console.log(" Watchdog already executed today. Skipping.");
+      return { success: true, skipped: true };
+    }
+
     isRunning = true;
     console.log(" Running Finora Daily Renewal Watchdog...");
 
@@ -45,7 +65,7 @@ export const runWatchdogCheck = async () => {
       `Watchdog check completed. Processed ${upcomingSubs.length} renewals.`,
     );
 
-    lastRunDate = new Date().toISOString().split("T")[0];
+    await setLastRunDate(todayStr);
 
     return { success: true, processedCount: upcomingSubs.length };
   } catch (error) {
@@ -67,10 +87,12 @@ export const initRenewalWatchdog = () => {
     const currentMinute = now.getMinutes();
     const todayStr = now.toISOString().split("T")[0];
 
+    const lastRun = await getLastRunDate();
+
     if (
       currentHour >= 8 &&
       currentMinute >= 30 &&
-      lastRunDate !== todayStr &&
+      lastRun !== todayStr &&
       !isRunning
     ) {
       console.log(" Catch-up watchdog triggered (missed morning execution)...");
