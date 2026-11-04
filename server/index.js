@@ -13,13 +13,20 @@ import userRoute from "./src/routes/userRoute.js";
 import adminRoute from "./src/routes/adminRoute.js";
 
 import subscriptionRoute from "./src/routes/subscriptionRoute.js";
-import { initRenewalWatchdog } from "./src/jobs/renewalWatchdog.js";
+import {
+  initRenewalWatchdog,
+  runWatchdogCheck,
+} from "./src/jobs/renewalWatchdog.js";
 
 connectDB();
 
 const app = express();
 
 initRenewalWatchdog();
+
+runWatchdogCheck().catch((err) =>
+  console.error("Startup watchdog error:", err),
+);
 
 const PORT = process.env.PORT || 3000;
 
