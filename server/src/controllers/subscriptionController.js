@@ -158,3 +158,89 @@ export const handleRealBankSync = async (req, res) => {
       .json({ message: "Server error syncing bank", error: error.message });
   }
 };
+
+const detectSubscriptionFromNarration = (narration) => {
+  const text = narration.toLowerCase();
+
+  const knownMerchants = [
+    { name: "Netflix", keywords: ["netflix", "net-flix"] },
+    { name: "Spotify", keywords: ["spotify"] },
+    { name: "Apple", keywords: ["apple.com", "itunes", "icloud"] },
+    { name: "Google", keywords: ["google", "youtube premium"] },
+    { name: "DSTV", keywords: ["dstv", "multichoice"] },
+    {
+      name: "Internet / Data",
+      keywords: ["spectranet", "swift", "mtn sub", "glo sub"],
+    },
+  ];
+
+  for (const merchant of knownMerchants) {
+    if (merchant.keywords.some((keyword) => text.includes(keyword))) {
+      return merchant.name;
+    }
+  }
+  return null;
+};
+
+const extractAmount = (line) => {
+  const match = line.match(
+    /\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b|\b\d+(?:\.\d{2})?\b/g,
+  );
+
+  if (!match || match.length === 0) return 0;
+
+  const rawAmount = match[match.length - 1].replace(/,/g, "");
+  const parsed = parseFloat(rawAmount);
+
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+export const importBankStatement = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { rawText } = req.body;
+
+    if (!rawText) {
+      return res
+        .status(400)
+        .json({ success: false, message: " and rawText is required." });
+    }
+
+    const lines = rawText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const discoveredSubscriptions = [];
+
+    for (const line of lines) {
+      const merchantName = detectSubscriptionFromNarration(line);
+
+      if (merchantName) {
+        const detectedAmount = extractAmount(line);
+
+        const testDueDate = new Date();
+        testDueDate.setDate(testDueDate.getDate() + 3);
+
+        const newSub = await subscriptionsModel.create({
+          userId: userId,
+          name: merchantName,
+          amount: detectedAmount > 0 ? detectedAmount : 5000,
+          dueDate: testDueDate,
+          status: "active",
+          source: "manual_import",
+        });
+
+        discoveredSubscriptions.push(newSub);
+      }
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: `Successfully parsed statement and found ${discoveredSubscriptions.length} subscriptions!`,
+      subscriptions: discoveredSubscriptions,
+    });
+  } catch (error) {
+    console.error("Error parsing bank statement:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};

@@ -21,7 +21,7 @@ const setLastRunDate = async (dateStr) => {
 export const runWatchdogCheck = async () => {
   if (isRunning) {
     console.log(
-      "⚠️ Watchdog check already in progress, skipping overlapping run.",
+      " Watchdog check already in progress, skipping overlapping run.",
     );
     return { success: false, reason: "Already running" };
   }
